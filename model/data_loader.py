@@ -82,7 +82,7 @@ def compute_com_df(ticker, mode):
     df.reset_index(inplace=True)
     df.set_index("Date", inplace=True)
     df.drop(["index"], 1, inplace=True)
-    columns = {"Adj Close": ticker.rstrip(".DE") + "_adj_close",
+    columns = {"Adj Close": r_chop(ticker, ".DE") + "_adj_close",
                # "Open": ticker.rstrip(".DE") + "_open",
                # "High": ticker.rstrip(".DE") + "_high",
                # "Low": ticker.rstrip(".DE") + "_low",

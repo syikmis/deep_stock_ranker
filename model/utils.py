@@ -30,7 +30,7 @@ def split_dataframe(df, n_steps, n_outlook):
             break
         # gather input and output parts of the pattern
         seq_x = df.iloc[i:end_ix, :]
-        seq_y = df.iloc[end_ix + n_outlook-1, :]
+        seq_y = df.iloc[end_ix + n_outlook - 1, :]
         X.append(seq_x.values)
         y.append(seq_y.item())
 
@@ -43,3 +43,9 @@ def moving_average(a, n=10):
     ret = np.cumsum(a, dtype=float)
     ret[n:] = ret[n:] - ret[:-n]
     return ret[n - 1:] / n
+
+
+def r_chop(string, ending):
+    if string.endswith(ending):
+        return string[:-len(ending)]
+    return string

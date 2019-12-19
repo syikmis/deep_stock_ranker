@@ -8,8 +8,8 @@ import model.web_scrapper as ws
 from model.model import *
 from model.utils import *
 
-EXPERIMENTS_PCC_ = "experiments/pccV1_selected/"
-RESULT_CSV = "experiments/ranking_resultV1_selected.csv"
+EXPERIMENTS_PCC_ = "experiments/pccV1/"
+RESULT_CSV = "experiments/ranking_resultV1.csv"
 MODELS_PATH = "experiments/modelsV1/"
 MODELS_SUFFIX = "_rankerV1.h5"
 

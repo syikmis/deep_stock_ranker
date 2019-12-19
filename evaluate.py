@@ -1,16 +1,16 @@
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 
 import model.data_loader as dl
 import model.web_scrapper as ws
+from model.utils import *
 
-RESULT_CSV = "experiments/ranking_resultV2.csv"
+RESULT_CSV = "experiments/ranking_resultV1_selected.csv"
 RANK = "RANK"
 
 
 def evaluate(n_stocks):
-    FIG_NAME = "experiments/plots/portfolio_return_V2_TOP_" + str(n_stocks) + ".jpeg"
+    FIG_NAME = "experiments/plots/portfolio_return_V1_SELECTED_TOP_" + str(n_stocks) + ".jpeg"
 
     df = pd.read_csv(RESULT_CSV, sep=",")
     # df[RANK] = df[RANK] * -1
@@ -42,7 +42,7 @@ def evaluate(n_stocks):
     y = np.array(sum)
     ax.plot(x, y, color="red", linewidth=2, alpha=0.7)
     for i, col in list(enumerate(list(main_df.columns.values))):
-        ax.plot(x, df[col], linewidth=1, alpha=0.4, label=col.rstrip("_adj_close"))
+        ax.plot(x, df[col], linewidth=1, alpha=0.4, label=r_chop(col, "_adj_close"))
     ax.set(xlabel='date [d]', ylabel='Adj Close of Portfolio [€]',
            title='Portfolio TOP' + str(n_stocks) + ' Return: {0:.2%}'.format(total_return))
     ax.tick_params(axis="x", labelsize=8, labelcolor="black")
