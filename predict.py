@@ -8,13 +8,12 @@ import model.web_scrapper as ws
 from model.model import *
 from model.utils import *
 
-EXPERIMENTS_PCC_ = "experiments/pccV1/"
-RESULT_CSV = "experiments/ranking_resultV1.csv"
-MODELS_PATH = "experiments/modelsV1/"
-MODELS_SUFFIX = "_rankerV1.h5"
+EXPERIMENTS_PCC_ = "experiments/pccV2/"
+RESULT_CSV = "experiments/ranking_resultV2.csv"
+MODELS_PATH = "experiments/modelsV2/"
+MODELS_SUFFIX = "_rankerV2.h5"
 
 n_steps = 60
-n_outlook = 3
 
 sectors = {"ADS.DE": ["clothing"],
            "ALV.DE": ["insurance", ],
@@ -49,7 +48,6 @@ sectors = {"ADS.DE": ["clothing"],
 
 
 def save_pccs(models_pccs):
-
     if not os.path.isdir(EXPERIMENTS_PCC_):
         os.mkdir(EXPERIMENTS_PCC_)
     for key in list(models_pccs.keys()):
@@ -70,7 +68,7 @@ def save_rankings(rankings):
 
 
 def refresh_data():
-    refresh = str(input("Do you want to reload the data [test]? [y|N]: "))
+    refresh = str(input("Do you want to refresh the data [test]? [y|N]: "))
     while refresh != "y" and refresh != "N":
         refresh = str(input("Do you want to refresh the data [test]? [y|N]: "))
     if refresh == "y":
@@ -82,7 +80,7 @@ def select_models_by_sectors(ticker):
     models = [x for x, y in sectors.items() if len(list(set(y) & set(ticker_sectors))) != 0]
     models = [x[:-3] + MODELS_SUFFIX for x in models]
 
-    to_ignore = ["1COV_rankerV1.h5", "EOAN_rankerV1.h5", "FRE_rankerV1.h5"]
+    to_ignore = ["FRE_rankerV2.h5", "1COV_rankerV2.h5"]
     models = set(models)
     to_ignore = set(to_ignore)
     models.difference_update(to_ignore)
@@ -103,11 +101,7 @@ def predict(selected):
 
     for ticker in tickers:
         print(bcolors.OKMSG + bcolors.BLUEIC + "[INFO] Compute ranking value for " + ticker + bcolors.END)
-
-        test_df = dl.get_com_test(ticker, force=True)
-        test_df = compute_features(test_df)
-        test_x, test_y = split_dataframe(test_df, n_steps, n_outlook=n_outlook)
-        test_y = np.expand_dims(test_y, axis=1)
+        test_x, test_y = dl.get_test_data(ticker, n_steps=n_steps)
 
         n_features = test_x[0].shape[1]
         rank_avg_model = []
@@ -118,14 +112,18 @@ def predict(selected):
                 continue
         for model_name in models:
             key = model_name.rstrip(".h5") + "_pcc"
-            model = SpookyArtificialIntelligence(n_steps, n_features).get_model()
-            model.load_weights(MODELS_PATH + model_name)
+            model = SpookyArtificialIntelligenceV2(n_steps, n_features).get_model()
+            try:
+                model.load_weights(MODELS_PATH + model_name)
+            except OSError:
+                print(bcolors.ERR + "No .h5 found for " + model_name + "\n>>>still continuing..." + bcolors.END)
+                continue
             # yhat is list of predicted mean return values for next 10 days for each sample of 60 days
             yhat = model.predict(test_x)
             # pearson correlation coefficient between predicted rank value and log(stock_return)
             pcc = pearsonr(test_y, yhat)
             # collect pcc for all stocks for each model
-            models_pccs[key].append((ticker, pcc[0][0]))
+            models_pccs[key].append((ticker, pcc[0].item()))
             yhat = moving_average(yhat, 10)
             # rank per stock & each model := mean(mvg_avg10(predicted_rank)
             rank_avg_model.append(np.mean(yhat))

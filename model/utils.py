@@ -5,8 +5,7 @@ def compute_features(df):
     columns = list(df.columns.values)
 
     for column in columns:
-        # df[column] = np.log(df[column])
-        df[column + "_rtn"] = np.log(df[column]) - np.log(df[column]).shift(-1)
+        df[column + "_rtn"] = np.log(df[column]) - np.log(df[column].shift(1))
         df.drop([column], 1, inplace=True)
 
     return clean_dataframe(df)
@@ -19,18 +18,18 @@ def clean_dataframe(df):
 
 
 # split a multivariate sequence into samples
-def split_dataframe(df, n_steps, n_outlook):
+def split_dataframe(df, n_steps=60):
     # columns = list(df.columns.values)
     X, y = list(), list()
     for i in range(df.shape[0]):
         # find the end of this pattern
         end_ix = i + n_steps
         # check if we are beyond the dataset
-        if end_ix + n_outlook > len(df) - 1:
+        if end_ix > len(df) - 1:
             break
         # gather input and output parts of the pattern
         seq_x = df.iloc[i:end_ix, :]
-        seq_y = df.iloc[end_ix + n_outlook - 1, :]
+        seq_y = df.iloc[end_ix, :]
         X.append(seq_x.values)
         y.append(seq_y.item())
 

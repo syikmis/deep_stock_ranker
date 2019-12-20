@@ -26,13 +26,13 @@ def train():
         os.mkdir(models_path)
     refresh_data()
     tickers = ws.get_tickers()
-    tickers.remove("EOAN.DE")
+    # TODO: get data for FRE.DE
     tickers.remove("FRE.DE")
     tickers.remove("1COV.DE")
     for ticker in tickers:
         mes = "Build model for " + ticker
         print(bcolors.BLUE + bcolors.BOLD + bcolors.UNDERLINE + "{:*^30}".format(mes) + bcolors.END)
-        train_x, train_y, val_x, val_y = dl.get_stock_data(ticker, n_steps, n_outlook)
+        train_x, train_y, val_x, val_y = dl.get_train_data(ticker, n_steps)
         n_featues = train_x[0].shape[1]
         model = SpookyArtificialIntelligenceV2(n_steps, n_featues).get_model()
         model.fit(x=train_x, y=train_y, validation_data=(val_x, val_y), epochs=20, verbose=1, shuffle=False)

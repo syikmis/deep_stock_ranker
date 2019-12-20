@@ -1,8 +1,9 @@
 import datetime as dt
 import pickle
 from pathlib import Path
-import pandas as pd
+
 import bcolors
+import pandas as pd
 
 import model.web_scrapper as ws
 from model.utils import *
@@ -17,7 +18,7 @@ TRAIN_PKL = PKL_DIR / "DAX30_train.pkl"
 VAL_PKL = PKL_DIR / "DAX30_val.pkl"
 TEST_PKL = PKL_DIR / "DAX30_test.pkl"
 
-train_start = dt.datetime(2005, 1, 1)
+train_start = dt.datetime(2001, 1, 1)
 train_end = dt.datetime(2015, 12, 31)
 val_start = dt.datetime(2016, 1, 1)
 val_end = dt.datetime(2017, 12, 31)
@@ -41,7 +42,7 @@ def compute_dax_df(mode):
     for count, ticker in enumerate(tickers):
         ticker = ticker.rstrip()
         try:
-            df = get_com_as_df(ticker, mode)
+            df = _get_com_as_df(ticker, mode)
         except IOError:
             print(bcolors.WARN +
                   "[INFO][" + mode + "] No .csv found for {}".format(ticker) + bcolors.END)
@@ -65,15 +66,15 @@ def compute_dax_df(mode):
 
     main_df.fillna(0, inplace=True)
     # print(main_df.tail())
-    save_dax_as_csv(main_df, mode)
-    save_dax_as_pkl(main_df, mode)
+    _save_dax_as_csv(main_df, mode)
+    _save_dax_as_pkl(main_df, mode)
     return main_df
 
 
 def compute_com_df(ticker, mode):
     df = pd.DataFrame()
     try:
-        df = get_com_as_df(ticker, mode)
+        df = _get_com_as_df(ticker, mode)
     except IOError:
         print(bcolors.WARN +
               "[INFO][" + mode + "] No .csv found for {}".format(ticker) + bcolors.END)
@@ -115,7 +116,7 @@ def save_com_as_csv(df, ticker, mode):
     print("[INFO][" + mode + "] Saved {} data to {}".format(ticker, path))
 
 
-def save_dax_as_csv(df, mode):
+def _save_dax_as_csv(df, mode):
     """
     Saves dax data as .csv
     param df: DataFrame
@@ -126,7 +127,7 @@ def save_dax_as_csv(df, mode):
     print("[INFO][" + mode + "] Saved DAX30 data to {}".format(path))
 
 
-def save_dax_as_pkl(df, mode):
+def _save_dax_as_pkl(df, mode):
     path = path_to_string(PKL_DIR) + "/DAX30_" + mode + ".pkl"
     with open(path, "wb") as f:
         pickle.dump(df, f)
@@ -139,7 +140,7 @@ def get_dax_as_pkl(mode):
         pickle.load(f)
 
 
-def get_com_as_df(ticker, mode):
+def _get_com_as_df(ticker, mode):
     if mode == "train":
         path = path_to_string(TRAIN_DIR) + "/{}.csv".format(ticker)
     elif mode == "val":
@@ -174,7 +175,7 @@ def refresh_dax_data():
     compute_dax_df("test")
 
 
-def get_com_train(ticker, force=False):
+def _get_com_train(ticker, force=False):
     if force:
         return compute_com_df(ticker, "train")
     else:
@@ -184,7 +185,7 @@ def get_com_train(ticker, force=False):
             return compute_com_df(ticker, "train")
 
 
-def get_com_val(ticker, force=False):
+def _get_com_val(ticker, force=False):
     if force:
         return compute_com_df(ticker, "val")
     else:
@@ -194,7 +195,7 @@ def get_com_val(ticker, force=False):
             return compute_com_df(ticker, "val")
 
 
-def get_com_test(ticker, force=False):
+def _get_com_test(ticker, force=False):
     if force:
         return compute_com_df(ticker, "test")
     else:
@@ -204,17 +205,23 @@ def get_com_test(ticker, force=False):
             return compute_com_df(ticker, "test")
 
 
-def load_data(ticker):
-    train_df = get_com_train(ticker, force=True)
-    val_df = get_com_val(ticker, force=True)
+def _load_data(ticker):
+    train_df = _get_com_train(ticker, force=True)
+    val_df = _get_com_val(ticker, force=True)
     return train_df, val_df
 
 
-def get_stock_data(ticker, n_steps, n_outlook):
-    train_df, val_df = load_data(ticker)
+def get_train_data(ticker, n_steps):
+    train_df, val_df = _load_data(ticker)
     train_df, val_df = compute_features(train_df), compute_features(val_df)
-    train_x, train_y = split_dataframe(train_df, n_steps, n_outlook)
-    val_x, val_y = split_dataframe(val_df, n_steps, n_outlook)
+    train_x, train_y = split_dataframe(train_df, n_steps)
+    val_x, val_y = split_dataframe(val_df, n_steps)
     return train_x, train_y, val_x, val_y
 
 
+def get_test_data(ticker, n_steps):
+    test_df = _get_com_test(ticker, force=True)
+    test_df = compute_features(test_df)
+    test_x, test_y = split_dataframe(test_df, n_steps=n_steps)
+    test_y = np.expand_dims(test_y, axis=1)
+    return test_x, test_y
