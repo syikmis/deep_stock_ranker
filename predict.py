@@ -8,9 +8,9 @@ import model.web_scrapper as ws
 from model.model import *
 from model.utils import *
 
-EXPERIMENTS_PCC_ = "experiments/pccV2/"
-RESULT_CSV = "experiments/ranking_resultV2.csv"
-MODELS_PATH = "experiments/modelsV2/"
+EXPERIMENTS_PCC_ = "experiments/pccV1/"
+RESULT_CSV = "experiments/ranking_resultV1"
+MODELS_PATH = "experiments/modelsV1/"
 MODELS_SUFFIX = "_rankerV2.h5"
 
 n_steps = 60
@@ -72,7 +72,7 @@ def refresh_data():
     while refresh != "y" and refresh != "N":
         refresh = str(input("Do you want to refresh the data [test]? [y|N]: "))
     if refresh == "y":
-        dl.refresh_dax_data()
+        dl.reload_test_data()
 
 
 def select_models_by_sectors(ticker):
@@ -94,13 +94,16 @@ def predict(selected):
     models = os.listdir(MODELS_PATH)
     models = [x for x in models if not x.startswith(".")]
     tickers = ws.get_tickers()
+    # tickers.remove("EOAN.DE")
+    # tickers.remove("FRE.DE")
+    # tickers.remove("WDI.DE")
     i = 0
     for model in models:
         key = model.rstrip(".h5") + "_pcc"
         models_pccs[key] = []
 
     for ticker in tickers:
-        print(bcolors.OKMSG + bcolors.BLUEIC + "[INFO] Compute ranking value for " + ticker + bcolors.END)
+        print(bcolors.BLUEIC + "[INFO] Compute ranking value for: " + ws.ticker_to_name(ticker) + bcolors.END)
         test_x, test_y = dl.get_test_data(ticker, n_steps=n_steps)
 
         n_features = test_x[0].shape[1]
@@ -110,9 +113,11 @@ def predict(selected):
             if not models:
                 print(bcolors.WARN + "[WARN] No suited models found for " + ticker + " -> passing.." + bcolors.END)
                 continue
+            print("Selected models: " + ", ".join(models))
+
         for model_name in models:
             key = model_name.rstrip(".h5") + "_pcc"
-            model = SpookyArtificialIntelligenceV2(n_steps, n_features).get_model()
+            model = SpookyArtificialIntelligenceV1(n_steps, n_features).get_model()
             try:
                 model.load_weights(MODELS_PATH + model_name)
             except OSError:
@@ -121,30 +126,35 @@ def predict(selected):
             # yhat is list of predicted mean return values for next 10 days for each sample of 60 days
             yhat = model.predict(test_x)
             # pearson correlation coefficient between predicted rank value and log(stock_return)
+            yhat = yhat[np.logical_not(np.isnan(yhat))]
+            test_y = test_y[np.logical_not(np.isnan(test_y))]
             pcc = pearsonr(test_y, yhat)
             # collect pcc for all stocks for each model
             models_pccs[key].append((ticker, pcc[0].item()))
-            yhat = moving_average(yhat, 10)
+            # yhat = moving_average(yhat, 10)
             # rank per stock & each model := mean(mvg_avg10(predicted_rank)
             rank_avg_model.append(np.mean(yhat))
         # rank per stock & over all models
         rank_avg_overall = np.mean(rank_avg_model)
         rankings[ticker] = rank_avg_overall
         i += 1
-        print(bcolors.OKMSG + "[INFO] {0:.0%} completed".format(i / len(tickers)) + bcolors.END)
-        print(bcolors.OKMSG + RESULT_CSV + bcolors.END)
+        print(bcolors.OKMSG + "{0:.0%} completed".format(i / len(tickers)) + bcolors.END)
 
     save_rankings(rankings)
+    print(bcolors.OKMSG + RESULT_CSV + bcolors.END)
     save_pccs(models_pccs)
 
 
 if __name__ == "__main__":
-    opening = "Welcome to \"Deep Stock Ranker\":\n" \
-              "A LSTM Neural Network Model for Stock Selection"
-    print(bcolors.BLUE + bcolors.BOLD + bcolors.UNDERLINE + "{:*^30}".format(opening) + bcolors.END)
-    selection = str(input("Do you want to predict stocks by selected models only (same sector)? [y|N]: "))
-    if selection == "y":
-        selection = True
-    else:
-        selection = False
-    predict(selected=selection)
+    with Timer():
+        opening = "Welcome to \"Deep Stock Ranker\":\n" \
+                  "A LSTM Neural Network Model for Stock Selection"
+        print(bcolors.BLUE + bcolors.BOLD + bcolors.UNDERLINE + "{:*^30}".format(opening) + bcolors.END)
+        selection = str(input("Do you want to predict stocks by selected models only (same sector)? [y|N]: "))
+        if selection == "y":
+            selection = True
+            RESULT_CSV = RESULT_CSV + "_SELECTED.csv"
+        else:
+            selection = False
+            RESULT_CSV = RESULT_CSV + "_ALL.csv"
+        predict(selected=selection)

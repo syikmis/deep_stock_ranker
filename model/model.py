@@ -10,6 +10,15 @@ class SpookyArtificialIntelligence:
         self.model = self.build_model(n_steps, n_features)
 
     def build_model(self, n_steps, n_features):
+        pass
+
+    def get_model(self):
+        return self.model
+
+
+class SpookyArtificialIntelligenceV1(SpookyArtificialIntelligence):
+
+    def build_model(self, n_steps, n_features):
         model = Sequential()
         model.add(LSTM(256, activation='relu', return_sequences=True, input_shape=(n_steps, n_features)))
         model.add(Flatten())
@@ -18,14 +27,8 @@ class SpookyArtificialIntelligence:
         model.compile(optimizer='adam', loss='mse')
         return model
 
-    def get_model(self):
-        return self.model
 
-
-class SpookyArtificialIntelligenceV2:
-
-    def __init__(self, n_steps, n_features):
-        self.model = self.build_model(n_steps, n_features)
+class SpookyArtificialIntelligenceV2(SpookyArtificialIntelligence):
 
     def build_model(self, n_steps, n_features):
         model = Sequential()
@@ -37,5 +40,6 @@ class SpookyArtificialIntelligenceV2:
         model.compile(optimizer='adam', loss='mse')
         return model
 
-    def get_model(self):
-        return self.model
+
+class SpookyArtificialIntelligenceV3(SpookyArtificialIntelligence):
+    pass

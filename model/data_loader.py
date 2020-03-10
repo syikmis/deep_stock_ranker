@@ -19,10 +19,10 @@ VAL_PKL = PKL_DIR / "DAX30_val.pkl"
 TEST_PKL = PKL_DIR / "DAX30_test.pkl"
 
 train_start = dt.datetime(2001, 1, 1)
-train_end = dt.datetime(2015, 12, 31)
-val_start = dt.datetime(2016, 1, 1)
-val_end = dt.datetime(2017, 12, 31)
-test_start = dt.datetime(2018, 1, 1)
+train_end = dt.datetime(2017, 9, 30)
+val_start = dt.datetime(2018, 10, 1)
+val_end = dt.datetime(2019, 9, 30)
+test_start = dt.datetime(2019, 10, 1)
 test_end = dt.datetime.now()
 modes = ["train", "val", "test"]
 
@@ -153,19 +153,19 @@ def _get_com_as_df(ticker, mode):
     return df
 
 
-def reload_dax_data():
+def reload_train_val_data(overwrite=False):
     times = [("train", train_start, train_end),
              ("val", val_start, val_end)]
     ws.get_com_tickers_names()
     # Fetch and save .csv for each com
-    ws.get_com_data(times)
+    ws.get_com_data(times, overwrite=overwrite)
     print(bcolors.OKMSG + "[INFO] Reload data finished!" + bcolors.END)
-    # compute, save as pickle and return DataFrame
+    # compute Dataframe, save as pickle and return DataFrame
     for mode in ["train", "val"]:
         compute_dax_df(mode)
 
 
-def refresh_dax_data():
+def reload_test_data():
     times = [("test", test_start, test_end)]
     # First get list from Wikipedia with all ticker symbols and name
     ws.get_com_tickers_names()
@@ -205,14 +205,14 @@ def _get_com_test(ticker, force=False):
             return compute_com_df(ticker, "test")
 
 
-def _load_data(ticker):
+def _load_train_val(ticker):
     train_df = _get_com_train(ticker, force=True)
     val_df = _get_com_val(ticker, force=True)
     return train_df, val_df
 
 
 def get_train_data(ticker, n_steps):
-    train_df, val_df = _load_data(ticker)
+    train_df, val_df = _load_train_val(ticker)
     train_df, val_df = compute_features(train_df), compute_features(val_df)
     train_x, train_y = split_dataframe(train_df, n_steps)
     val_x, val_y = split_dataframe(val_df, n_steps)

@@ -1,3 +1,5 @@
+import datetime
+
 import numpy as np
 
 
@@ -48,3 +50,19 @@ def r_chop(string, ending):
     if string.endswith(ending):
         return string[:-len(ending)]
     return string
+
+
+class Timer:
+
+    def __init__(self):
+        self.start = 0
+        self.end = 0
+
+    def __enter__(self):
+        self.start = datetime.datetime.now()
+        print("Script execution started: " + str(self.start.strftime("%H:%M:%S")))
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.end = datetime.datetime.now()
+        diff = self.end - self.start
+        print("Script execution took: " + str(diff))
