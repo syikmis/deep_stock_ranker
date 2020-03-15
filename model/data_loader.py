@@ -170,7 +170,7 @@ def reload_test_data():
     # First get list from Wikipedia with all ticker symbols and name
     ws.get_com_tickers_names()
     # Fetch and save .csv for each com
-    ws.get_com_data(times)
+    ws.get_com_data(times, overwrite=True)
     print(bcolors.OKMSG + "[INFO] Refresh data finished!" + bcolors.END)
     compute_dax_df("test")
 

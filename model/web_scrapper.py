@@ -62,21 +62,20 @@ def get_com_data(times, ticker=None, overwrite=False):
         print(bcolors.WAITMSG + "[INFO] Load " + mode + " data from " + start.strftime("%d/%m/%Y") + " till " +
               end.strftime("%d/%m/%Y") + bcolors.END)
         for ticker in tickers:
-            if mode is not "test":
-                file = ticker + ".csv"
-                file = COM_DATA_DIR / mode / file
-                if file.is_file() and not overwrite:
-                    print("[INFO] Skipped loading " + ticker + "! Already saved!")
-                if overwrite:
-                    # just in case your connection breaks, we"d like to save our progress!
-                    print("[INFO] Fetch data for " + ticker + " ...")
-                    try:
-                        df = web.DataReader(ticker, "yahoo", start, end)
-                    except (IOError, KeyError):
-                        print(bcolors.WARN + "No data from yahoo found for: {}".format(ticker) + bcolors.END)
-                        continue
-                    dl.save_com_as_csv(df, ticker, mode)
-                    time.sleep(1)
+            file = ticker + ".csv"
+            file = COM_DATA_DIR / mode / file
+            if file.is_file() and not overwrite:
+                print("[INFO] Skipped loading " + ticker + "! Already saved!")
+            if overwrite:
+                # just in case your connection breaks, we"d like to save our progress!
+                print("[INFO] Fetch data for " + ticker + " ...")
+                try:
+                    df = web.DataReader(ticker, "yahoo", start, end)
+                except (IOError, KeyError):
+                    print(bcolors.WARN + "No data from yahoo found for: {}".format(ticker) + bcolors.END)
+                    continue
+                dl.save_com_as_csv(df, ticker, mode)
+                time.sleep(1)
 
 
 def get_tickers():
