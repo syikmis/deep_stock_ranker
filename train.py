@@ -30,7 +30,7 @@ def train():
 
     for ticker in tickers:
         mes = "Build model for " + ws.ticker_to_name(ticker)
-        print(bcolors.BLUE + bcolors.BOLD + bcolors.UNDERLINE + "{:*^30}".format(mes) + bcolors.END)
+        print(bcolors.CFG + bcolors.BOLD + bcolors.UNDERLINE + "{:*^30}".format(mes) + bcolors.END)
         train_x, train_y, val_x, val_y = dl.get_train_data(ticker, n_steps)
         n_featues = train_x[0].shape[1]
         model = SpookyArtificialIntelligenceV1(n_steps, n_featues).get_model()
@@ -47,5 +47,5 @@ def train():
 if __name__ == "__main__":
     opening = "Welcome to \"Deep Stock Ranker\":\n" \
               "A LSTM Neural Network Model for Stock Selection"
-    print(bcolors.BLUE + bcolors.BOLD + bcolors.UNDERLINE + "{:*^30}".format(opening) + bcolors.END)
+    print(bcolors.CFG + bcolors.BOLD + bcolors.UNDERLINE + "{:*^30}".format(opening) + bcolors.END)
     train()

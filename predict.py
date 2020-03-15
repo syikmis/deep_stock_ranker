@@ -11,7 +11,7 @@ from model.utils import *
 EXPERIMENTS_PCC_ = "experiments/pccV1/"
 RESULT_CSV = "experiments/ranking_resultV1"
 MODELS_PATH = "experiments/modelsV1/"
-MODELS_SUFFIX = "_rankerV2.h5"
+MODELS_SUFFIX = "_rankerV1.h5"
 
 n_steps = 60
 
@@ -149,7 +149,7 @@ if __name__ == "__main__":
     with Timer():
         opening = "Welcome to \"Deep Stock Ranker\":\n" \
                   "A LSTM Neural Network Model for Stock Selection"
-        print(bcolors.BLUE + bcolors.BOLD + bcolors.UNDERLINE + "{:*^30}".format(opening) + bcolors.END)
+        print(bcolors.CFG+ bcolors.BOLD + bcolors.UNDERLINE + "{:*^30}".format(opening) + bcolors.END)
         selection = str(input("Do you want to predict stocks by selected models only (same sector)? [y|N]: "))
         if selection == "y":
             selection = True
