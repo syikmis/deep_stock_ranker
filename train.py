@@ -4,7 +4,7 @@ import bcolors
 
 import model.data_loader as dl
 import model.web_scrapper as ws
-from model.model import SpookyArtificialIntelligenceV1, SpookyArtificialIntelligenceV2
+from model.model import SpookyArtificialIntelligenceV1
 
 n_steps = 60
 n_outlook = 1
@@ -26,7 +26,7 @@ def train():
         os.mkdir(models_path)
     refresh_data()
     tickers = ws.get_tickers()
-    #tickers = ["EOAN.DE"]
+    # tickers = ["EOAN.DE"]
 
     for ticker in tickers:
         mes = "Build model for " + ws.ticker_to_name(ticker)
@@ -43,6 +43,7 @@ def train():
         model_name = ticker[:-3] + model_suffix
         model.save_weights(models_path + model_name)
         print(bcolors.OK + "[INFO] Saved " + model_name + bcolors.END)
+
 
 if __name__ == "__main__":
     opening = "Welcome to \"Deep Stock Ranker\":\n" \
