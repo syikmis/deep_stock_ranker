@@ -19,10 +19,10 @@ VAL_PKL = PKL_DIR / "DAX30_val.pkl"
 TEST_PKL = PKL_DIR / "DAX30_test.pkl"
 
 train_start = dt.datetime(2001, 1, 1)
-train_end = dt.datetime(2017, 9, 30)
-val_start = dt.datetime(2018, 10, 1)
-val_end = dt.datetime(2019, 9, 30)
-test_start = dt.datetime(2019, 10, 1)
+train_end = dt.datetime(2018, 12, 31)
+val_start = dt.datetime(2019, 1, 1)
+val_end = dt.datetime(2020, 2, 29)
+test_start = dt.datetime(2020, 3, 1)
 test_end = dt.datetime.now()
 modes = ["train", "val", "test"]
 
